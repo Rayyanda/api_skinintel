@@ -2,11 +2,14 @@ services:
   - type: web
     name: skin-cancer-detection-api
     runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    plan: free
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt && python setup.py
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
-        value: 3.10.0
+        value: 3.10.6
+      - key: PORT
+        generateValue: true
     disk:
       name: data
       mountPath: /opt/render/project/src
