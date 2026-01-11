@@ -614,6 +614,68 @@ def admin_export():
     except Exception as e:
         return f"Error exporting dataset: {str(e)}", 500
 
+@app.route('/admin/users')
+@login_required
+def admin_users():
+    """User management page"""
+    users = database.get_all_users()
+    return render_template('admin_users.html', users=users)
+
+@app.route('/admin/users/<int:user_id>')
+@login_required
+def admin_user_detail(user_id):
+    """View user detail"""
+    user = database.get_user_by_id(user_id)
+    if not user:
+        return "User not found", 404
+    
+    # Get user's uploads
+    uploads = database.get_user_uploads(user_id)
+    
+    # Get user statistics
+    stats = {
+        'total_uploads': len(uploads),
+        'high_risk': len([u for u in uploads if u['risk_level'] == 'high']),
+        'medium_risk': len([u for u in uploads if u['risk_level'] == 'medium']),
+        'low_risk': len([u for u in uploads if u['risk_level'] == 'low']),
+    }
+    
+    return render_template('admin_user_detail.html', user=user, uploads=uploads, stats=stats)
+
+@app.route('/admin/users/<int:user_id>/reset-password', methods=['POST'])
+@login_required
+def admin_reset_password(user_id):
+    """Reset user password"""
+    new_password = request.form.get('new_password')
+    
+    if not new_password:
+        return jsonify({'success': False, 'error': 'Password required'}), 400
+    
+    database.update_user_password(user_id, new_password)
+    
+    return redirect(url_for('admin_user_detail', user_id=user_id))
+
+@app.route('/admin/users/<int:user_id>/delete', methods=['POST'])
+@login_required
+def admin_delete_user(user_id):
+    """Delete user account"""
+    # Delete user's uploads first
+    uploads = database.get_user_uploads(user_id)
+    for upload in uploads:
+        # Delete files
+        for folder in [PENDING_FOLDER, REVIEWED_FOLDER]:
+            filepath = os.path.join(folder, upload['filename'])
+            if os.path.exists(filepath):
+                os.remove(filepath)
+        
+        # Delete from database
+        database.delete_upload(upload['id'])
+    
+    # Delete user
+    database.delete_user(user_id)
+    
+    return redirect(url_for('admin_users'))
+
 @app.route('/admin/image/<folder>/<filename>')
 @login_required
 def admin_image(folder, filename):

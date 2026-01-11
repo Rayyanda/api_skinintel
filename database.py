@@ -179,6 +179,38 @@ def update_user_profile(user_id, **kwargs):
     
     conn.close()
 
+def update_user_password(user_id, new_password):
+    """Update user password"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('UPDATE users SET password = ? WHERE id = ?', (new_password, user_id))
+    conn.commit()
+    conn.close()
+
+def delete_user(user_id):
+    """Delete user account"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM users WHERE id = ?', (user_id,))
+    conn.commit()
+    conn.close()
+
+def get_all_users():
+    """Get all registered users"""
+    conn = get_db_connection()
+    users = conn.execute('''
+        SELECT 
+            users.*,
+            COUNT(uploads.id) as total_uploads,
+            MAX(uploads.uploaded_at) as last_upload
+        FROM users
+        LEFT JOIN uploads ON users.id = uploads.user_id
+        GROUP BY users.id
+        ORDER BY users.created_at DESC
+    ''').fetchall()
+    conn.close()
+    return users
+
 # ============================================
 # UPLOAD MANAGEMENT
 # ============================================

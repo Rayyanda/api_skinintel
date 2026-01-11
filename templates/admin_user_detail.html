@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Detail - {{ user.username }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark mb-4">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">👤 User Detail</span>
+            <div>
+                <a href="{{ url_for('admin_users') }}" class="btn btn-light me-2">Back to Users</a>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-light me-2">Dashboard</a>
+                <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-light">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+            <!-- User Profile Card -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Profile Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" 
+                                 style="width: 80px; height: 80px; font-size: 2rem;">
+                                {{ user.full_name[0].upper() }}
+                            </div>
+                        </div>
+                        
+                        <h5 class="text-center">{{ user.full_name }}</h5>
+                        <p class="text-center text-muted">@{{ user.username }}</p>
+                        
+                        <hr>
+                        
+                        <div class="mb-2">
+                            <strong><i class="fas fa-id-card"></i> User ID:</strong> {{ user.id }}
+                        </div>
+                        
+                        {% if user.age %}
+                        <div class="mb-2">
+                            <strong><i class="fas fa-birthday-cake"></i> Age:</strong> {{ user.age }} years
+                        </div>
+                        {% endif %}
+                        
+                        {% if user.gender %}
+                        <div class="mb-2">
+                            <strong><i class="fas fa-venus-mars"></i> Gender:</strong> {{ user.gender }}
+                        </div>
+                        {% endif %}
+                        
+                        {% if user.weight and user.height %}
+                        <div class="mb-2">
+                            <strong><i class="fas fa-weight"></i> Weight:</strong> {{ user.weight }} kg
+                        </div>
+                        <div class="mb-2">
+                            <strong><i class="fas fa-ruler-vertical"></i> Height:</strong> {{ user.height }} cm
+                        </div>
+                        {% endif %}
+                        
+                        {% if user.bmi %}
+                        <div class="mb-2">
+                            <strong><i class="fas fa-calculator"></i> BMI:</strong> 
+                            <span class="badge 
+                                {% if user.bmi < 18.5 %}bg-info
+                                {% elif user.bmi < 25 %}bg-success
+                                {% elif user.bmi < 30 %}bg-warning
+                                {% else %}bg-danger{% endif %}">
+                                {{ "%.1f"|format(user.bmi) }}
+                            </span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if user.outdoor_activity %}
+                        <div class="mb-2">
+                            <strong><i class="fas fa-sun"></i> Outdoor Activity:</strong> {{ user.outdoor_activity }}
+                        </div>
+                        {% endif %}
+                        
+                        <hr>
+                        
+                        <div class="mb-2">
+                            <strong><i class="fas fa-calendar"></i> Registered:</strong><br>
+                            <small>{{ user.created_at }}</small>
+                        </div>
+                        
+                        {% if user.last_login %}
+                        <div class="mb-2">
+                            <strong><i class="fas fa-sign-in-alt"></i> Last Login:</strong><br>
+                            <small>{{ user.last_login }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Actions Card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-warning">
+                        <h6 class="mb-0">Admin Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <!-- Reset Password -->
+                        <button class="btn btn-warning btn-sm w-100 mb-2" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
+                            <i class="fas fa-key"></i> Reset Password
+                        </button>
+                        
+                        <!-- Delete User -->
+                        <button class="btn btn-danger btn-sm w-100" data-bs-toggle="modal" data-bs-target="#deleteUserModal">
+                            <i class="fas fa-trash"></i> Delete User
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Activity -->
+            <div class="col-md-8">
+                <!-- Statistics -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <h3>{{ stats.total_uploads }}</h3>
+                                <small>Total Uploads</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-danger text-white">
+                            <div class="card-body text-center">
+                                <h3>{{ stats.high_risk }}</h3>
+                                <small>High Risk</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body text-center">
+                                <h3>{{ stats.medium_risk }}</h3>
+                                <small>Medium Risk</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <h3>{{ stats.low_risk }}</h3>
+                                <small>Low Risk</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload History -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Upload History</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if uploads|length == 0 %}
+                        <div class="alert alert-info text-center">
+                            No uploads yet.
+                        </div>
+                        {% else %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Predicted Class</th>
+                                        <th>Confidence</th>
+                                        <th>Risk Level</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for upload in uploads %}
+                                    <tr>
+                                        <td><small>{{ upload.uploaded_at[:19] }}</small></td>
+                                        <td>{{ upload.predicted_class }}</td>
+                                        <td>{{ "%.1f"|format(upload.confidence * 100) }}%</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'danger' if upload.risk_level == 'high' else ('warning' if upload.risk_level == 'medium' else 'success') }}">
+                                                {{ upload.risk_level|upper }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if upload.reviewed %}
+                                            <span class="badge bg-success">Reviewed</span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">Pending</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div class="modal fade" id="resetPasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reset Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('admin_reset_password', user_id=user.id) }}">
+                    <div class="modal-body">
+                        <p>Reset password for <strong>{{ user.username }}</strong></p>
+                        <div class="mb-3">
+                            <label class="form-label">New Password</label>
+                            <input type="password" class="form-control" name="new_password" required minlength="6">
+                            <small class="text-muted">Minimum 6 characters</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-warning">Reset Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete User Modal -->
+    <div class="modal fade" id="deleteUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Delete User</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('admin_delete_user', user_id=user.id) }}">
+                    <div class="modal-body">
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i> 
+                            <strong>Warning!</strong> This action cannot be undone.
+                        </div>
+                        <p>Are you sure you want to delete user <strong>{{ user.username }}</strong>?</p>
+                        <p>This will also delete:</p>
+                        <ul>
+                            <li>{{ stats.total_uploads }} upload(s)</li>
+                            <li>All associated data</li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Yes, Delete User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

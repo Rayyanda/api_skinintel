@@ -31,6 +31,9 @@
         <div class="container-fluid">
             <span class="navbar-brand mb-0 h1">📊 Admin Dashboard</span>
             <div>
+                <a href="{{ url_for('admin_users') }}" class="btn btn-light me-2">
+                    <i class="fas fa-users"></i> Users
+                </a>
                 <a href="{{ url_for('admin_review') }}" class="btn btn-light me-2">Review Uploads</a>
                 <a href="{{ url_for('admin_export') }}" class="btn btn-success me-2">Export Dataset</a>
                 <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-light">Logout</a>
@@ -50,6 +53,20 @@
                                 <h2 class="mb-0">{{ stats.total_uploads }}</h2>
                             </div>
                             <i class="fas fa-upload stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">Total Users</h6>
+                                <h2 class="mb-0">{{ stats.total_users }}</h2>
+                            </div>
+                            <i class="fas fa-users stat-icon"></i>
                         </div>
                     </div>
                 </div>
@@ -82,16 +99,46 @@
                     </div>
                 </div>
             </div>
-            
-            <div class="col-md-3 mb-3">
-                <div class="card stat-card bg-info text-white">
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+                <div class="card stat-card bg-secondary text-white">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="mb-0">Accuracy</h6>
+                                <h6 class="mb-0">Prediction Accuracy</h6>
                                 <h2 class="mb-0">{{ "%.1f"|format(stats.accuracy) }}%</h2>
                             </div>
                             <i class="fas fa-chart-line stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card bg-dark text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">Avg Age</h6>
+                                <h2 class="mb-0">{{ "%.0f"|format(stats.avg_age) if stats.avg_age else '-' }}</h2>
+                            </div>
+                            <i class="fas fa-birthday-cake stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card bg-dark text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">Avg BMI</h6>
+                                <h2 class="mb-0">{{ "%.1f"|format(stats.avg_bmi) if stats.avg_bmi else '-' }}</h2>
+                            </div>
+                            <i class="fas fa-weight stat-icon"></i>
                         </div>
                     </div>
                 </div>
