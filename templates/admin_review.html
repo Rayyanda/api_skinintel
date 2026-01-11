@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Uploads - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .review-card {
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .prediction-badge {
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark mb-4">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">🔍 Review Uploads</span>
+            <div>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-light me-2">Dashboard</a>
+                <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-light">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% if uploads|length == 0 %}
+        <div class="alert alert-info text-center">
+            <h4>🎉 All caught up!</h4>
+            <p class="mb-0">No pending uploads to review.</p>
+        </div>
+        {% else %}
+        
+        <div class="alert alert-primary">
+            <strong>{{ uploads|length }}</strong> upload(s) pending review
+        </div>
+
+        {% for upload in uploads %}
+        <div class="card review-card">
+            <div class="card-body">
+                <div class="row">
+                    <!-- Image Column -->
+                    <div class="col-md-4 text-center">
+                        <img src="{{ url_for('admin_image', folder='pending', filename=upload.filename) }}" 
+                             alt="Upload" class="image-preview mb-3">
+                        <p class="text-muted mb-0">
+                            <small>{{ upload.original_filename }}</small>
+                        </p>
+                    </div>
+                    
+                    <!-- Info & Review Column -->
+                    <div class="col-md-8">
+                        <h5 class="mb-3">Upload #{{ upload.id }}</h5>
+                        
+                        <!-- Prediction Info -->
+                        <div class="mb-4">
+                            <div class="row mb-2">
+                                <div class="col-6">
+                                    <strong>Predicted Class:</strong>
+                                </div>
+                                <div class="col-6">
+                                    <span class="badge prediction-badge bg-primary">
+                                        {{ upload.predicted_class }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-2">
+                                <div class="col-6">
+                                    <strong>Confidence:</strong>
+                                </div>
+                                <div class="col-6">
+                                    {{ "%.1f"|format(upload.confidence * 100) }}%
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-2">
+                                <div class="col-6">
+                                    <strong>Risk Level:</strong>
+                                </div>
+                                <div class="col-6">
+                                    <span class="badge bg-{{ 'danger' if upload.risk_level == 'high' else ('warning' if upload.risk_level == 'medium' else 'success') }}">
+                                        {{ upload.risk_level|upper }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>Uploaded:</strong>
+                                </div>
+                                <div class="col-6">
+                                    {{ upload.uploaded_at }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <!-- Review Form -->
+                        <form method="POST" action="{{ url_for('admin_review_submit', upload_id=upload.id) }}">
+                            <div class="mb-3">
+                                <label for="actual_class_{{ upload.id }}" class="form-label">
+                                    <strong>Actual Class:</strong>
+                                </label>
+                                <select class="form-select" id="actual_class_{{ upload.id }}" name="actual_class" required>
+                                    {% for class_name in class_names %}
+                                    <option value="{{ class_name }}" 
+                                            {% if class_name == upload.predicted_class %}selected{% endif %}>
+                                        {{ class_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="notes_{{ upload.id }}" class="form-label">
+                                    <strong>Notes (Optional):</strong>
+                                </label>
+                                <textarea class="form-control" id="notes_{{ upload.id }}" 
+                                          name="notes" rows="2" 
+                                          placeholder="Add any observations..."></textarea>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <button type="submit" name="action" value="approve" 
+                                        class="btn btn-success flex-fill">
+                                    <i class="fas fa-check"></i> Approve & Save
+                                </button>
+                                <button type="submit" name="action" value="delete" 
+                                        class="btn btn-danger"
+                                        onclick="return confirm('Are you sure you want to delete this upload?')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
