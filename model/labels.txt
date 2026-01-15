@@ -1,2 +1,2 @@
 0 Kanker Kulit
-1 Kulit Sehat
+1 Tidak Terdeteksi Kanker
