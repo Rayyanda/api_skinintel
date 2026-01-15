@@ -31,7 +31,7 @@ database.init_db()
 
 # Get base directory
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, 'model', 'model.tflite')
+MODEL_PATH = os.path.join(BASE_DIR, 'model', 'model_unquant.tflite')
 LABELS_PATH = os.path.join(BASE_DIR, 'model', 'labels.txt')
 
 # Load TFLite model
